@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RETRO CALC-80 :: System Ready</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated starfield background */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* CRT Monitor Container */
+        .crt-monitor {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow:
+                0 0 80px rgba(0, 255, 0, 0.3),
+                inset 0 0 30px rgba(0, 0, 0, 0.8);
+            border: 3px solid #333;
+        }
+
+        .crt-monitor::before {
+            content: 'CALC-80';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: #666;
+            letter-spacing: 2px;
+        }
+
+        /* CRT Screen */
+        .crt-screen {
+            position: relative;
+            background: #0d1b0d;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow:
+                inset 0 0 50px rgba(0, 255, 0, 0.1),
+                0 0 30px rgba(0, 0, 0, 0.9);
+            border: 2px solid #1a1a1a;
+            overflow: hidden;
+        }
+
+        /* Scanlines effect */
+        .crt-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(0, 0, 0, 0.15) 3px
+            );
+            pointer-events: none;
+            z-index: 10;
+            animation: scanlines 8s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        /* CRT glow effect */
+        .crt-screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center,
+                rgba(0, 255, 0, 0.05) 0%,
+                transparent 70%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .calculator {
+            position: relative;
+            z-index: 2;
+            width: 320px;
+        }
+
+        /* Display */
+        .display-container {
+            background: #000;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #0a3d0a;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .display {
+            font-family: 'VT323', monospace;
+            font-size: 36px;
+            color: #00ff00;
+            text-align: right;
+            min-height: 50px;
+            text-shadow:
+                0 0 10px #00ff00,
+                0 0 20px #00ff00;
+            word-wrap: break-word;
+            letter-spacing: 2px;
+        }
+
+        .display.blink {
+            animation: blink 0.5s;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Buttons */
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            padding: 20px;
+            background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+            border: 2px solid #444;
+            border-radius: 8px;
+            color: #0f0;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow:
+                0 4px 0 #111,
+                inset 0 0 10px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #3a3a3a, #2f2f2f);
+            box-shadow:
+                0 4px 0 #111,
+                inset 0 0 15px rgba(0, 255, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow:
+                0 0 0 #111,
+                inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        button.operator {
+            background: linear-gradient(145deg, #1a3d1a, #0f2f0f);
+            color: #0ff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        button.operator:hover {
+            background: linear-gradient(145deg, #2a4d2a, #1f3f1f);
+        }
+
+        button.equals {
+            background: linear-gradient(145deg, #3a1a1a, #2f0f0f);
+            color: #ff0;
+            grid-column: span 2;
+            text-shadow: 0 0 5px #ffff00;
+        }
+
+        button.equals:hover {
+            background: linear-gradient(145deg, #4a2a2a, #3f1f1f);
+        }
+
+        button.clear {
+            background: linear-gradient(145deg, #3d1a1a, #2f0f0f);
+            color: #f00;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        button.clear:hover {
+            background: linear-gradient(145deg, #4d2a2a, #3f1f1f);
+        }
+
+        /* Secret mode indicator */
+        .secret-mode {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .secret-mode.active {
+            opacity: 1;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Easter egg animations */
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .rainbow-mode {
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        /* Boot sequence */
+        .boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #0f0;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            padding: 50px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+
+        .boot-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .boot-line {
+            opacity: 0;
+            animation: fadeIn 0.1s forwards;
+            margin: 5px 0;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Boot screen -->
+    <div class="boot-screen" id="bootScreen">
+        <div class="boot-line" style="animation-delay: 0s;">CALC-80 BIOS v3.14</div>
+        <div class="boot-line" style="animation-delay: 0.1s;">Copyright (C) 1982 RetroComp Systems</div>
+        <div class="boot-line" style="animation-delay: 0.2s;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+        <div class="boot-line" style="animation-delay: 0.4s;">CPU: MOS 6502 @ 1MHz</div>
+        <div class="boot-line" style="animation-delay: 0.5s;">RAM: 64KB OK</div>
+        <div class="boot-line" style="animation-delay: 0.6s;">ROM: 16KB OK</div>
+        <div class="boot-line" style="animation-delay: 0.8s;">Loading Calculator OS...</div>
+        <div class="boot-line" style="animation-delay: 1.2s;">[████████████████████] 100%</div>
+        <div class="boot-line" style="animation-delay: 1.5s;">System Ready.</div>
+        <div class="boot-line" style="animation-delay: 1.8s;"></div>
+        <div class="boot-line" style="animation-delay: 2s; color: #888;">Hint: Try the Konami code... ↑↑↓↓←→←→BA</div>
+    </div>
+
+    <!-- Starfield background -->
+    <div class="starfield" id="starfield"></div>
+
+    <!-- CRT Monitor -->
+    <div class="crt-monitor">
+        <div class="secret-mode" id="secretMode">★ HACKER MODE ★</div>
+
+        <div class="crt-screen">
+            <div class="calculator">
+                <div class="display-container">
+                    <div class="display" id="display">0</div>
+                </div>
+
+                <div class="buttons">
+                    <button class="clear" onclick="clearDisplay()">C</button>
+                    <button class="operator" onclick="appendOperator('/')">/</button>
+                    <button class="operator" onclick="appendOperator('*')">*</button>
+                    <button class="operator" onclick="appendOperator('-')">-</button>
+
+                    <button onclick="appendNumber('7')">7</button>
+                    <button onclick="appendNumber('8')">8</button>
+                    <button onclick="appendNumber('9')">9</button>
+                    <button class="operator" onclick="appendOperator('+')">+</button>
+
+                    <button onclick="appendNumber('4')">4</button>
+                    <button onclick="appendNumber('5')">5</button>
+                    <button onclick="appendNumber('6')">6</button>
+                    <button class="operator" onclick="appendOperator('%')">%</button>
+
+                    <button onclick="appendNumber('1')">1</button>
+                    <button onclick="appendNumber('2')">2</button>
+                    <button onclick="appendNumber('3')">3</button>
+                    <button onclick="appendNumber('.')">.</button>
+
+                    <button onclick="appendNumber('0')">0</button>
+                    <button class="equals" onclick="calculate()">=</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create starfield
+        const starfield = document.getElementById('starfield');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            starfield.appendChild(star);
+        }
+
+        // Boot sequence
+        setTimeout(() => {
+            document.getElementById('bootScreen').classList.add('hidden');
+        }, 2500);
+
+        // Calculator state
+        let currentDisplay = '0';
+        let previousValue = null;
+        let operation = null;
+        let shouldResetDisplay = false;
+
+        // Konami code detection
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+        let secretMode = false;
+
+        const display = document.getElementById('display');
+        const secretModeIndicator = document.getElementById('secretMode');
+
+        function updateDisplay() {
+            display.textContent = currentDisplay;
+            display.classList.add('blink');
+            setTimeout(() => display.classList.remove('blink'), 100);
+        }
+
+        function appendNumber(num) {
+            if (shouldResetDisplay) {
+                currentDisplay = num;
+                shouldResetDisplay = false;
+            } else {
+                currentDisplay = currentDisplay === '0' ? num : currentDisplay + num;
+            }
+            updateDisplay();
+            checkEasterEggs();
+        }
+
+        function appendOperator(op) {
+            if (operation && !shouldResetDisplay) {
+                calculate();
+            }
+            previousValue = parseFloat(currentDisplay);
+            operation = op;
+            shouldResetDisplay = true;
+        }
+
+        function calculate() {
+            if (operation && previousValue !== null) {
+                const current = parseFloat(currentDisplay);
+                let result;
+
+                switch (operation) {
+                    case '+': result = previousValue + current; break;
+                    case '-': result = previousValue - current; break;
+                    case '*': result = previousValue * current; break;
+                    case '/': result = previousValue / current; break;
+                    case '%': result = previousValue % current; break;
+                }
+
+                currentDisplay = result.toString();
+                operation = null;
+                previousValue = null;
+                shouldResetDisplay = true;
+                updateDisplay();
+                checkEasterEggs();
+            }
+        }
+
+        function clearDisplay() {
+            currentDisplay = '0';
+            previousValue = null;
+            operation = null;
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        // Easter egg detection
+        function checkEasterEggs() {
+            const value = currentDisplay;
+
+            // 1337 (LEET)
+            if (value === '1337') {
+                triggerLeetMode();
+            }
+
+            // 8008 or 80085 (BOOB/BOOBS when upside down)
+            if (value === '8008' || value === '80085') {
+                triggerBoobMode();
+            }
+
+            // 666
+            if (value === '666') {
+                triggerEvilMode();
+            }
+
+            // 42 (Answer to everything)
+            if (value === '42') {
+                triggerAnswerMode();
+            }
+        }
+
+        function triggerLeetMode() {
+            const monitor = document.querySelector('.crt-monitor');
+            monitor.classList.add('rainbow-mode');
+            display.textContent = '1337 H4X0R!';
+
+            setTimeout(() => {
+                monitor.classList.remove('rainbow-mode');
+                currentDisplay = '1337';
+                updateDisplay();
+            }, 2000);
+        }
+
+        function triggerBoobMode() {
+            const monitor = document.querySelector('.crt-monitor');
+            monitor.classList.add('shake');
+            display.textContent = 'CLASSIC!';
+
+            setTimeout(() => {
+                monitor.classList.remove('shake');
+                display.textContent = '( . Y . )';
+            }, 500);
+
+            setTimeout(() => {
+                currentDisplay = display.textContent.includes('85') ? '80085' : '8008';
+                updateDisplay();
+            }, 2000);
+        }
+
+        function triggerEvilMode() {
+            const screen = document.querySelector('.crt-screen');
+            const originalBg = screen.style.background;
+            screen.style.background = '#1b0d0d';
+            display.style.color = '#ff0000';
+            display.style.textShadow = '0 0 10px #ff0000, 0 0 20px #ff0000';
+            display.textContent = 'EVIL MODE';
+
+            setTimeout(() => {
+                screen.style.background = originalBg;
+                display.style.color = '#00ff00';
+                display.style.textShadow = '0 0 10px #00ff00, 0 0 20px #00ff00';
+                currentDisplay = '666';
+                updateDisplay();
+            }, 2000);
+        }
+
+        function triggerAnswerMode() {
+            display.textContent = 'THE ANSWER';
+            setTimeout(() => {
+                display.textContent = 'TO LIFE...';
+            }, 1000);
+            setTimeout(() => {
+                display.textContent = 'UNIVERSE...';
+            }, 2000);
+            setTimeout(() => {
+                display.textContent = 'EVERYTHING';
+            }, 3000);
+            setTimeout(() => {
+                currentDisplay = '42';
+                updateDisplay();
+            }, 4000);
+        }
+
+        // Konami code listener
+        document.addEventListener('keydown', (e) => {
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    activateSecretMode();
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        function activateSecretMode() {
+            secretMode = !secretMode;
+            secretModeIndicator.classList.toggle('active');
+
+            const monitor = document.querySelector('.crt-monitor');
+            const screen = document.querySelector('.crt-screen');
+
+            if (secretMode) {
+                display.textContent = 'HACKER MODE ON';
+                monitor.style.boxShadow = '0 0 80px rgba(255, 0, 255, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.8)';
+                screen.style.background = '#0d0d1b';
+                display.style.color = '#ff00ff';
+                display.style.textShadow = '0 0 10px #ff00ff, 0 0 20px #ff00ff';
+
+                // Change button colors
+                document.querySelectorAll('button').forEach(btn => {
+                    btn.style.color = '#ff00ff';
+                    btn.style.textShadow = '0 0 5px #ff00ff';
+                });
+            } else {
+                monitor.style.boxShadow = '0 0 80px rgba(0, 255, 0, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.8)';
+                screen.style.background = '#0d1b0d';
+                display.style.color = '#00ff00';
+                display.style.textShadow = '0 0 10px #00ff00, 0 0 20px #00ff00';
+
+                document.querySelectorAll('button').forEach(btn => {
+                    if (!btn.classList.contains('operator') && !btn.classList.contains('equals') && !btn.classList.contains('clear')) {
+                        btn.style.color = '#0f0';
+                        btn.style.textShadow = '0 0 5px #00ff00';
+                    }
+                });
+
+                currentDisplay = '0';
+                updateDisplay();
+            }
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') {
+                appendNumber(e.key);
+            } else if (e.key === '.') {
+                appendNumber('.');
+            } else if (['+', '-', '*', '/', '%'].includes(e.key)) {
+                appendOperator(e.key);
+            } else if (e.key === 'Enter' || e.key === '=') {
+                calculate();
+            } else if (e.key === 'Escape' || e.key.toLowerCase() === 'c') {
+                clearDisplay();
+            }
+        });
+    </script>
+</body>
+</html>
