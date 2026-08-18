@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prudentibus — Web Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff2a6d;
+    --cyan: #05d9e8;
+    --nav-h: 64px;
+    --idle: #6b7590;               /* non-active nav items */
+    --glow-pink: 0 0 6px rgba(255,42,109,0.9), 0 0 22px rgba(255,42,109,0.45);
+    --glow-cyan: 0 0 8px rgba(5,217,232,0.85), 0 0 20px rgba(5,217,232,0.4);
+    --glow-white: 0 0 8px rgba(150,180,255,0.8);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    color: #c8cdd4;
+    font-family: "DotGothic16", "Noto Sans JP", monospace;
+  }
+
+  /* ============================ NAVBAR ============================ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 24px;
+    background: #07080d;
+    border-bottom: 1px solid #1b1e2c;
+  }
+  .grow { flex: 1; }
+
+  .brand {
+    font-size: 18px;
+    min-width: 16ch;
+    color: var(--pink);
+    text-shadow: var(--glow-pink);
+    display: flex;
+    align-items: center;
+  }
+  .caret-bar {
+    width: 2px; height: 1.05em;
+    margin-left: 4px;
+    background: currentColor;
+    animation: blink 1.1s steps(1) infinite;
+    opacity: 0;
+  }
+  nav.typing .caret-bar { opacity: 1; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .tabs {
+    position: relative;
+    display: flex;
+    gap: 34px;
+    height: var(--nav-h);
+    align-items: center;
+  }
+  .tab {
+    background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 15px;
+    text-transform: uppercase;
+    color: var(--idle);
+    transition: color 0.2s, text-shadow 0.2s;
+  }
+  .tab:hover, .tab.active { color: #dfe6ff; text-shadow: var(--glow-white); }
+
+  /* contact: always the last channel; action page, so it goes pink not white */
+  .tab-contact {
+    margin-left: 6px;
+    padding-left: 28px;
+    border-left: 1px solid #1b1e2c;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tab-contact svg { width: 14px; height: 14px; fill: currentColor; }
+  .tab-contact:hover, .tab-contact.active {
+    color: #ffd7e4;
+    text-shadow: var(--glow-pink);
+  }
+
+  /* portal slider: leading edge leaves first, trailing edge catches up */
+  .slider {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--cyan);
+    box-shadow: var(--glow-cyan);
+  }
+  .slider.pulse { animation: arrive 0.35s ease-out; }
+  @keyframes arrive {
+    30% { box-shadow: 0 0 16px rgba(5,217,232,1), 0 0 34px rgba(5,217,232,0.7); }
+  }
+
+  .visit {
+    font: inherit; font-size: 13px;
+    text-decoration: none;
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    border-radius: 4px;
+    padding: 8px 16px;
+    box-shadow: 0 0 10px rgba(5,217,232,0.25), inset 0 0 10px rgba(5,217,232,0.12);
+    transition: box-shadow 0.2s;
+  }
+  .visit:hover { box-shadow: 0 0 18px rgba(5,217,232,0.6), inset 0 0 14px rgba(5,217,232,0.25); }
+  .visit.off {                       /* unlit tube: present but not clickable */
+    color: var(--idle);
+    border-color: #262b3d;
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  .progress {
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 2px;
+    pointer-events: none;
+  }
+  .progress i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    box-shadow: 0 0 8px rgba(5,217,232,0.7);
+  }
+
+  /* intro: elements hidden, then flicker on left to right */
+  .stagger { visibility: hidden; }
+  .stagger.on { visibility: visible; animation: tubeOn 0.4s steps(8); }
+  @keyframes tubeOn {
+    0% { opacity: 0; } 18% { opacity: 1; } 26% { opacity: 0.2; } 40% { opacity: 1; }
+    52% { opacity: 0.4; } 66% { opacity: 1; } 100% { opacity: 1; }
+  }
+
+  /* ============================ CONTENT ============================ */
+  main { padding-top: var(--nav-h); min-height: 100vh; }
+  #shots img { display: block; width: 100%; }   /* stacked chunks read as one page */
+  .status {
+    padding: 80px 24px;
+    text-align: center;
+    color: #39405a;
+    font-size: 14px;
+  }
+
+  /* contact channel page — placeholder copy, swap freely */
+  .contact {
+    min-height: calc(100vh - var(--nav-h));
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 60px 24px;
+    background: #0a0c12;
+  }
+  .contact h1 {
+    font-size: 42px;
+    letter-spacing: 0.3em;
+    color: var(--pink);
+    text-shadow: var(--glow-pink);
+    margin-bottom: 16px;
+  }
+  .contact .tag { color: var(--idle); font-size: 15px; margin-bottom: 40px; }
+  .contact .mail {
+    display: inline-block;
+    font-size: 22px;
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(5, 217, 232, 0.4);
+    padding-bottom: 4px;
+    margin-bottom: 46px;
+    transition: text-shadow 0.2s;
+  }
+  .contact .mail:hover { text-shadow: 0 0 14px rgba(5,217,232,1), 0 0 34px rgba(5,217,232,0.6); }
+  .contact .socials { display: flex; gap: 16px; justify-content: center; }
+  .contact .socials a {
+    color: var(--idle);
+    border: 1px solid #262b3d;
+    border-radius: 4px;
+    padding: 8px 18px;
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .contact .socials a:hover {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: 0 0 12px rgba(5, 217, 232, 0.35);
+  }
+
+  /* fixed overlay where scanline/portal transitions play out */
+  #fx {
+    position: fixed;
+    top: var(--nav-h); left: 0; right: 0; bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .pane { position: absolute; inset: 0; overflow: hidden; background: #000; }
+  .pane .stack { position: absolute; left: 0; top: 0; width: 100%; }
+  .pane .stack img { display: block; width: 100%; }
+  .pane .stack .contact { min-height: calc(100vh - var(--nav-h)); }
+  .sweep {
+    position: absolute;
+    z-index: 3;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    box-shadow: 0 0 12px rgba(5,217,232,0.9), 0 0 32px rgba(255,42,109,0.5);
+  }
+
+  /* ============================ MOBILE ============================ */
+  /* compact nav so phone-landscape widths fit everything */
+  @media (max-width: 1000px) {
+    :root { --nav-h: 52px; }
+    nav { padding: 0 14px; gap: 12px; }
+    .brand { font-size: 14px; min-width: 12ch; }
+    .tabs { gap: 18px; }
+    .tab { font-size: 12px; }
+    .tab-contact { margin-left: 0; padding-left: 16px; }
+    .visit { font-size: 11px; padding: 6px 10px; }
+    .contact h1 { font-size: 30px; }
+    .contact .mail { font-size: 17px; }
+  }
+  @media (max-width: 760px) {
+    nav { padding: 0 10px; gap: 8px; }
+    .brand { font-size: 12px; min-width: 11ch; }
+    .tabs { gap: 12px; }
+    .tab { font-size: 10.5px; }
+    .tab-contact { padding-left: 10px; gap: 5px; }
+    .tab-contact svg { width: 11px; height: 11px; }
+    .visit { font-size: 10px; padding: 5px 8px; }
+  }
+
+  /* portrait phones get asked to rotate — this is a landscape thing */
+  #rotate {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    background: #05060a;
+    place-items: center;
+    text-align: center;
+  }
+  @media (orientation: portrait) and (max-width: 700px) {
+    #rotate { display: grid; }
+  }
+  #rotate .phone {
+    width: 34px; height: 58px;
+    border: 2px solid var(--cyan);
+    border-radius: 8px;
+    margin: 0 auto 26px;
+    box-shadow: var(--glow-cyan), inset 0 0 8px rgba(5,217,232,0.3);
+    animation: rotHint 1.8s ease-in-out infinite;
+  }
+  @keyframes rotHint {
+    0%, 25%  { transform: rotate(0); }
+    60%, 100% { transform: rotate(90deg); }
+  }
+  #rotate p {
+    color: var(--pink);
+    text-shadow: var(--glow-pink);
+    font-size: 14px;
+    letter-spacing: 0.25em;
+  }
+  #rotate .sub {
+    color: var(--idle);
+    text-shadow: none;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<nav id="bar">
+  <span class="brand"><span id="brandText"></span><span class="caret-bar"></span></span>
+  <span class="grow"></span>
+  <div class="tabs" id="tabs"><div class="slider stagger" id="slider"></div></div>
+  <a class="visit stagger" id="visit" href="#" target="_blank" rel="noopener">OPEN LIVE →</a>
+  <div class="progress"><i id="progressFill"></i></div>
+</nav>
+
+<main><div id="shots"></div></main>
+<div id="fx"></div>
+
+<div id="rotate">
+  <div>
+    <div class="phone"></div>
+    <p>ROTATE YOUR PHONE</p>
+    <p class="sub">THIS PORTFOLIO IS A LANDSCAPE THING</p>
+  </div>
+</div>
+
+<template id="contactTpl">
+  <section class="contact">
+    <div>
+      <h1>CONTACT</h1>
+      <p class="tag">Want a page like these? Let's build yours.</p>
+      <a class="mail" href="mailto:sname00012@gmail.com">sname00012@gmail.com</a>
+      <div class="socials">
+        <a href="https://www.linkedin.com/in/prudentibus/" target="_blank" rel="noopener">LINKEDIN</a>
+        <a href="https://t.me/MaxSpaceX" target="_blank" rel="noopener">TELEGRAM</a>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script src="projects.js"></script>
+<script>
+  const bar    = document.getElementById("bar");
+  const brand  = document.getElementById("brandText");
+  const tabs   = document.getElementById("tabs");
+  const slider = document.getElementById("slider");
+  const visit  = document.getElementById("visit");
+  const fill   = document.getElementById("progressFill");
+  const shots  = document.getElementById("shots");
+  const fx     = document.getElementById("fx");
+
+  const wait = (ms) => new Promise(r => setTimeout(r, ms));
+  const EASE = "cubic-bezier(0.4, 0, 0.2, 1)";
+  const EXTS = ["png", "jpg", "jpeg", "webp", "svg"];
+  const MAX_SHOTS = 40;
+
+  const CONTACT  = PROJECTS.length;          // contact channel is always last
+  const CHANNELS = PROJECTS.length + 1;
+
+  let current = 0;
+  let busy = true;                           // locked until the intro finishes
+  const discovered = PROJECTS.map(() => null);
+
+  /* ---------------- tabs ---------------- */
+  const tabEls = PROJECTS.map((p, i) => {
+    const b = document.createElement("button");
+    b.className = "tab stagger";
+    b.textContent = p.name;
+    b.addEventListener("click", () => switchTo(i));
+    tabs.insertBefore(b, slider);
+    return b;
+  });
+  const contactTab = document.createElement("button");
+  contactTab.className = "tab tab-contact stagger";
+  contactTab.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg><span>Contact</span>';
+  contactTab.addEventListener("click", () => switchTo(CONTACT));
+  tabs.insertBefore(contactTab, slider);
+  tabEls.push(contactTab);
+  tabEls[0].classList.add("active");
+
+  /* ---------------- screenshot discovery (indexed, prefix + zero-pad) ---------------- */
+  function probeIndex(project, i) {
+    return new Promise(resolve => {
+      const prefix = project.prefix || "";
+      const names = [];
+      for (const ext of EXTS) {
+        names.push(prefix + i + "." + ext);
+        if (i < 10) names.push(prefix + "0" + i + "." + ext);
+      }
+      let n = 0;
+      const tryNext = () => {
+        if (n >= names.length) return resolve(null);
+        const src = project.folder + "/" + names[n++];
+        const img = new Image();
+        img.onload = () => resolve(src);
+        img.onerror = tryNext;
+        img.src = src;
+      };
+      tryNext();
+    });
+  }
+  async function discover(idx) {
+    if (discovered[idx]) return discovered[idx];
+    const srcs = [];
+    for (let i = 1; i <= MAX_SHOTS; i++) {
+      const src = await probeIndex(PROJECTS[idx], i);
+      if (!src) break;
+      srcs.push(src);
+    }
+    discovered[idx] = srcs;
+    return srcs;
+  }
+  PROJECTS.forEach((_, i) => discover(i));   // warm all projects in the background
+
+  /* ---------------- channel content (projects = screenshots, contact = template) ---------------- */
+  function contentNodes(idx) {
+    const frag = document.createDocumentFragment();
+    if (idx === CONTACT) {
+      frag.appendChild(document.getElementById("contactTpl").content.cloneNode(true));
+      return frag;
+    }
+    (discovered[idx] || []).forEach((src, i) => {
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = PROJECTS[idx].name + " — part " + (i + 1);
+      frag.appendChild(img);
+    });
+    return frag;
+  }
+
+  function renderMain(idx) {
+    shots.innerHTML = "";
+    if (idx !== CONTACT && (discovered[idx] || []).length === 0) {
+      shots.innerHTML = '<div class="status">No screenshots found for "' + PROJECTS[idx].name +
+        '" — expected files numbered 1, 2, 3… in its folder</div>';
+      return;
+    }
+    shots.appendChild(contentNodes(idx));
+  }
+
+  function updateVisit() {
+    const p = current === CONTACT ? null : PROJECTS[current];
+    visit.classList.toggle("off", !p || !p.link);
+    if (p && p.link) visit.href = p.link;
+  }
+
+  /* ---------------- transition helpers ---------------- */
+  function buildPane(idx, scroll) {
+    const pane = document.createElement("div");
+    pane.className = "pane";
+    const stack = document.createElement("div");
+    stack.className = "stack";
+    stack.style.transform = "translateY(" + (-scroll) + "px)";
+    stack.appendChild(contentNodes(idx));
+    pane.appendChild(stack);
+    fx.appendChild(pane);
+    return pane;
+  }
+  async function commitUnderOverlay(idx) {
+    renderMain(idx);
+    window.scrollTo(0, 0);
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    fx.innerHTML = "";                       // overlay off only after repaint
+  }
+
+  /* scanline: intro only — prints the first piece top-to-bottom from black */
+  async function fxScanline(idx) {
+    const h = fx.clientHeight;
+    const pane = buildPane(idx, 0);
+    pane.style.clipPath = "inset(0 0 100% 0)";
+    const sweep = document.createElement("div");
+    sweep.className = "sweep";
+    sweep.style.cssText = "left:0;right:0;top:-6px;height:6px;";
+    fx.appendChild(sweep);
+
+    pane.animate([{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0 0 0% 0)" }],
+                 { duration: 700, easing: EASE, fill: "forwards" });
+    sweep.animate([{ transform: "translateY(0)" }, { transform: "translateY(" + (h + 6) + "px)" }],
+                  { duration: 700, easing: EASE, fill: "forwards" });
+    await wait(730);
+    await commitUnderOverlay(idx);
+  }
+
+  /* portal: piece-to-piece — neon edge wipes in from the side the target sits on */
+  async function fxPortal(oldIdx, newIdx, dir) {
+    const w = fx.clientWidth;
+    const fromRight = dir > 0;
+    const oldPane = buildPane(oldIdx, window.scrollY);
+    const newPane = buildPane(newIdx, 0);
+    newPane.style.clipPath = fromRight ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)";
+    const sweep = document.createElement("div");
+    sweep.className = "sweep";
+    sweep.style.cssText = "top:0;bottom:0;width:6px;" +
+                          (fromRight ? "left:" + w + "px;" : "left:-6px;");
+    fx.appendChild(sweep);
+
+    oldPane.animate([{ transform: "scale(1)", filter: "brightness(1)" },
+                     { transform: "scale(0.98)", filter: "brightness(0.55)" }],
+                    { duration: 600, easing: EASE, fill: "forwards" });
+    newPane.animate([{ clipPath: fromRight ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)" },
+                     { clipPath: "inset(0 0 0 0)" }],
+                    { duration: 600, easing: EASE, fill: "forwards" });
+    sweep.animate([{ transform: "translateX(0)" },
+                   { transform: "translateX(" + (fromRight ? -(w + 12) : (w + 12)) + "px)" }],
+                  { duration: 600, easing: EASE, fill: "forwards" });
+    await wait(630);
+    await commitUnderOverlay(newIdx);
+  }
+
+  /* ---------------- switching ---------------- */
+  async function switchTo(i, dirHint) {
+    i = (i + CHANNELS) % CHANNELS;
+    if (busy || i === current) return;
+    busy = true;
+
+    const dir = dirHint !== undefined ? dirHint : (i > current ? 1 : -1);
+    const oldIdx = current;
+    current = i;
+
+    tabEls.forEach((t, k) => t.classList.toggle("active", k === i));
+    moveSlider(tabEls[i], false, dir);
+    updateVisit();
+
+    if (i !== CONTACT) await discover(i);
+    await fxPortal(oldIdx, i, dir);
+    busy = false;
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") switchTo(current + 1, 1);
+    if (e.key === "ArrowLeft")  switchTo(current - 1, -1);
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= CHANNELS) switchTo(n - 1);
+  });
+
+  /* ---------------- portal slider under the tabs ---------------- */
+  let sliderLeft = 0;
+  function moveSlider(btn, instant, dir) {
+    const tR = tabs.getBoundingClientRect();
+    const bR = btn.getBoundingClientRect();
+    const left  = bR.left - tR.left;
+    const right = tR.right - bR.right;
+    const goingRight = dir !== undefined ? dir > 0 : left > sliderLeft;
+    sliderLeft = left;
+
+    if (instant) {
+      slider.style.transition = "none";
+    } else if (goingRight) {
+      slider.style.transition = "right 0.32s " + EASE + " 0s, left 0.32s " + EASE + " 0.09s";
+    } else {
+      slider.style.transition = "left 0.32s " + EASE + " 0s, right 0.32s " + EASE + " 0.09s";
+    }
+    slider.style.left  = left  + "px";
+    slider.style.right = right + "px";
+
+    if (!instant) {
+      slider.classList.remove("pulse");
+      void slider.offsetWidth;
+      setTimeout(() => slider.classList.add("pulse"), 380);
+    }
+  }
+  window.addEventListener("resize", () => moveSlider(tabEls[current], true));
+
+  /* ---------------- scroll progress tube ---------------- */
+  let ticking = false;
+  function updateProgress() {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    fill.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
+    ticking = false;
+  }
+  addEventListener("scroll", () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(updateProgress); }
+  }, { passive: true });
+
+  /* ---------------- intro: type brand -> light bar L-to-R -> scanline first piece ---------------- */
+  async function typeBrand() {
+    bar.classList.add("typing");
+    brand.textContent = "";
+    await wait(200);
+    const jp = "ウェブ・ポートフォリオ";
+    for (let i = 1; i <= jp.length; i++) { brand.textContent = jp.slice(0, i); await wait(40); }
+    await wait(300);
+    for (let i = jp.length; i >= 0; i--) { brand.textContent = jp.slice(0, i); await wait(18); }
+    const en = "WEB PORTFOLIO";
+    const step = Math.floor(500 / en.length);   // whole word in 0.5s
+    for (let i = 1; i <= en.length; i++) { brand.textContent = en.slice(0, i); await wait(step); }
+    await wait(400);
+    bar.classList.remove("typing");
+  }
+
+  async function intro() {
+    updateVisit();
+    await typeBrand();
+    const order = [...tabEls, slider, visit];
+    for (const el of order) {
+      if (el === slider) moveSlider(tabEls[0], true);
+      el.classList.add("on");
+      await wait(80);
+    }
+    await discover(0);
+    await fxScanline(0);
+    updateProgress();
+    busy = false;
+  }
+
+  intro();
+</script>
+</body>
+</html>
